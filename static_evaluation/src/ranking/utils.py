@@ -8,7 +8,6 @@ import networkx as nx
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import TfidfTransformer
 from scipy.sparse import csr_matrix
-from pandas.api.types import CategoricalDtype
 from typing import List, Tuple, Dict, Optional
 
 
@@ -17,10 +16,14 @@ def exponential_moving_average(values: np.ndarray, alpha: float) -> float:
     Compute the Exponential Moving Average (EMA) of a sequence.
 
     The EMA gives more weight to recent values, with the decay controlled by alpha.
+    Values are assumed to be in chronological order (most recent last).
 
     Args:
         values: Array of numeric values
-        alpha: Smoothing factor (0 < alpha <= 1). Higher alpha = more weight on recent values.
+        alpha: Smoothing/decay factor (0 < alpha <= 1). The most recent value
+            receives weight (1 - alpha) and older values decay by a factor of
+            alpha per step, so a *lower* alpha puts *more* weight on recent
+            values. The weights sum to 1.
 
     Returns:
         The EMA value as a single float

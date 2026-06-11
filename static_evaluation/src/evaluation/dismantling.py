@@ -8,7 +8,6 @@ to measure how effectively a ranking identifies key misinformation spreaders.
 import numpy as np
 import pandas as pd
 from typing import List, Tuple, Dict, Optional
-from sklearn.metrics import ndcg_score
 
 
 def compute_optimal_ranking(edgelist_df: pd.DataFrame) -> pd.DataFrame:
@@ -125,77 +124,6 @@ def dismantle_network(
         trace.append((node_id, remaining))
 
     return trace
-
-
-def compute_dismantling_trace(
-    reshare_df: pd.DataFrame,
-    ranking: List[Tuple],
-    credibility_threshold: float = 39.0,
-    author_col: str = "author_id",
-    target_col: str = "target_author_id",
-    credibility_col: str = "credibility_score",
-) -> List[Tuple[str, float]]:
-    """
-    Compute dismantling trace from raw reshare data and a ranking.
-
-    Convenience function that builds the network and performs dismantling.
-
-    Args:
-        reshare_df: DataFrame with reshare data
-        ranking: List of (user_id, score) tuples in removal order
-        credibility_threshold: Only include reshares with credibility <= this
-        author_col: Column name for resharer ID
-        target_col: Column name for original author ID
-        credibility_col: Column name for credibility score
-
-    Returns:
-        Dismantling trace as list of (node_id, remaining_fraction) tuples
-    """
-    from ..ranking.utils import build_reshare_network
-
-    network = build_reshare_network(
-        reshare_df,
-        author_col=author_col,
-        target_col=target_col,
-        credibility_col=credibility_col,
-        credibility_threshold=credibility_threshold,
-    )
-
-    return dismantle_network(network, ranking)
-
-
-def compute_ndcg_score(
-    true_ranking: List[Tuple],
-    test_ranking: List[Tuple],
-    k: Optional[int] = None,
-) -> float:
-    """
-    Compute NDCG score between two rankings.
-
-    Normalized Discounted Cumulative Gain measures how well the test ranking
-    approximates the true ranking, with emphasis on top positions.
-
-    Args:
-        true_ranking: Ground truth ranking as list of (id, score) tuples
-        test_ranking: Test ranking as list of (id, score) tuples
-        k: If specified, compute NDCG@k
-
-    Returns:
-        NDCG score between 0 and 1
-    """
-    true_dict = dict(true_ranking)
-    test_dict = dict(test_ranking)
-
-    # Align rankings on test keys
-    all_keys = set(test_dict.keys())
-
-    true_scores = [true_dict.get(k, 0) for k in all_keys]
-    test_scores = [test_dict.get(k, 0) for k in all_keys]
-
-    if len(true_scores) == 0:
-        return 0.0
-
-    return ndcg_score([true_scores], [test_scores], k=k, ignore_ties=False)
 
 
 def trace_to_array(trace: List[Tuple[str, float]]) -> np.ndarray:

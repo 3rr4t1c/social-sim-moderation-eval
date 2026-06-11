@@ -20,7 +20,6 @@ from .data_loader import (
     discover_simulation_folders,
     discover_real_datasets,
     load_all_runs,
-    get_data_summary,
 )
 from .ranking import get_ranker
 from .ranking.utils import build_reshare_network

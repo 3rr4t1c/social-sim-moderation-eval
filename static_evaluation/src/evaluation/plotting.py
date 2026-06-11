@@ -480,33 +480,3 @@ def plot_comparison_effectiveness(
         print(f"  Saved: {output_path}")
 
     return fig
-
-
-# Legacy function for backward compatibility
-def plot_real_vs_synthetic(
-    real_traces: Dict[str, np.ndarray],
-    synthetic_median_traces: Dict[str, np.ndarray],
-    synthetic_ci_lower_traces: Dict[str, np.ndarray],
-    synthetic_ci_upper_traces: Dict[str, np.ndarray],
-    real_title: str = "Real Data",
-    synthetic_title: str = "Synthetic Data",
-    suptitle: Optional[str] = None,
-    output_path: Optional[Path] = None,
-    figsize: Tuple[int, int] = (16, 6),
-    dpi: int = 150,
-) -> plt.Figure:
-    """
-    Legacy wrapper for plot_comparison_dismantling.
-    """
-    return plot_comparison_dismantling(
-        real_traces,
-        synthetic_median_traces,
-        synthetic_ci_lower_traces,
-        synthetic_ci_upper_traces,
-        real_title=real_title,
-        synthetic_title=synthetic_title,
-        suptitle=suptitle,
-        output_path=output_path,
-        figsize=figsize,
-        dpi=dpi,
-    )

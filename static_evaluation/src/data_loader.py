@@ -1,29 +1,14 @@
 """
 Data loading utilities for reshare network analysis.
 
-Handles loading and preprocessing of CSV data files, including:
-- Column name standardization
-- Timestamp normalization
-- Credibility score extraction from 'extra' field
+Handles loading and preprocessing of CSV data files, including timestamp
+parsing/normalization and credibility score extraction from the 'extra' field.
 """
 
 import ast
 import pandas as pd
 from pathlib import Path
-from typing import List, Optional, Tuple
-from datetime import datetime
-
-
-# Standard column names used throughout the codebase
-STANDARD_COLUMNS = {
-    "action_id": "action_id",
-    "timestamp": "timestamp",
-    "author_id": "author_id",
-    "action_type": "action_type",
-    "target_action_id": "target_action_id",
-    "target_author_id": "target_author_id",
-    "credibility_score": "credibility_score",
-}
+from typing import List, Tuple
 
 
 def parse_credibility_from_extra(
@@ -67,27 +52,6 @@ def parse_credibility_from_extra(
             return default_value
 
     return default_value
-
-
-def normalize_timestamp(ts_series: pd.Series) -> pd.Series:
-    """
-    Normalize timestamps to seconds from start.
-
-    Args:
-        ts_series: Series of timestamp values
-
-    Returns:
-        Series of float values representing seconds from first timestamp
-    """
-    # Convert to datetime if string
-    if ts_series.dtype == object:
-        ts_series = pd.to_datetime(ts_series)
-
-    # Compute delta from first timestamp
-    start_time = ts_series.iloc[0]
-    delta = (ts_series - start_time).dt.total_seconds()
-
-    return delta
 
 
 def load_reshare_data(
@@ -290,30 +254,3 @@ def load_all_runs(
         runs.append((run_path.stem, df))
 
     return runs
-
-
-def get_data_summary(df: pd.DataFrame, credibility_threshold: float = 39.0) -> dict:
-    """
-    Generate summary statistics for a reshare dataset.
-
-    Args:
-        df: Preprocessed reshare DataFrame
-        credibility_threshold: Threshold for low-credibility content
-
-    Returns:
-        Dictionary with summary statistics
-    """
-    low_cred_df = df[df["credibility_score"] <= credibility_threshold]
-
-    return {
-        "total_reshares": len(df),
-        "unique_resharers": df["author_id"].nunique(),
-        "unique_original_authors": df["target_author_id"].nunique(),
-        "unique_posts": df["target_action_id"].nunique(),
-        "low_cred_reshares": len(low_cred_df),
-        "low_cred_resharers": low_cred_df["author_id"].nunique() if len(low_cred_df) > 0 else 0,
-        "low_cred_authors": low_cred_df["target_author_id"].nunique() if len(low_cred_df) > 0 else 0,
-        "credibility_mean": df["credibility_score"].mean(),
-        "credibility_std": df["credibility_score"].std(),
-        "time_span_hours": (df["time_delta"].max() - df["time_delta"].min()) / 3600 if "time_delta" in df else None,
-    }

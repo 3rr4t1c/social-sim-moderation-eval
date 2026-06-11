@@ -14,7 +14,6 @@ and a summary LaTeX table.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -26,7 +25,7 @@ from matplotlib.lines import Line2D
 from .data_loader import load_synt_activities
 from .metrics import compute_bins, split_pre_post
 from .aggregation import (
-    ConditionStats, describe_array,
+    describe_array,
     _agg_timeseries,
 )
 from .static_on_synthetic import apply_static_moderation
@@ -419,7 +418,6 @@ def build_comparison_table(
     if not methods:
         return ""
 
-    thr_pct = int(round(quality_threshold * 100))
     if caption is None:
         caption = (
             f"Static vs.\\ dynamic moderation on {_escape(network_name)} "

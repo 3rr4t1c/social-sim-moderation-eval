@@ -23,7 +23,6 @@ import sys
 from pathlib import Path
 
 import pandas as pd
-import numpy as np
 
 # ---------------------------------------------------------------------------
 # Reference date: same epoch as vaccinitaly for timestamp conversion
