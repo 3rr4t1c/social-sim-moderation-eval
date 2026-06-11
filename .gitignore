@@ -205,3 +205,23 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# ---------------------------------------------------------------------------
+# Project-specific
+# ---------------------------------------------------------------------------
+
+# macOS metadata
+.DS_Store
+
+# Legacy source archive (kept locally as reference, superseded by git history)
+legacy_src.zip
+
+# Large input datasets (real + synthetic simulations) — too big for git.
+# Keep them locally; share via external storage if needed.
+static_evaluation/data/
+dynamic_evaluation/input/
+
+# Generated outputs (figures, LaTeX tables, GML graphs).
+# Produced by the pipelines and used in the paper; kept locally only.
+static_evaluation/output/
+dynamic_evaluation/output/
