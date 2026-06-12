@@ -31,7 +31,10 @@ METHOD_DISPLAY_NAMES: dict[str, str] = {
     "self_repost": "Self-Repost",
     "mean_repost_credibility": "Mean Repost Cred.",
     "cosine_eigenvector": "Coordination Centrality",
-    "cosine_max": "Cosine Max",
+    # Max cosine similarity with any other user; called "Coordination Edge
+    # Weight" in the paper. Used as a Random Forest feature rather than as a
+    # standalone method in the final comparison grid.
+    "cosine_max": "Coordination Edge Weight",
     "random_forest": "Random Forest",
 }
 
@@ -50,7 +53,7 @@ METHOD_ABBREV: dict[str, str] = {
     "self_repost": "SR",
     "mean_repost_credibility": "MRC",
     "cosine_eigenvector": "CE",
-    "cosine_max": "CM",
+    "cosine_max": "CEW",
     "random_forest": "RF",
 }
 
