@@ -9,6 +9,8 @@ Key metrics:
 - Cosine Max: Maximum similarity with any other user
 """
 
+import warnings
+
 import pandas as pd
 import networkx as nx
 from typing import List, Tuple
@@ -74,6 +76,13 @@ def cosine_eigenvector_ranker(
         centrality = nx.eigenvector_centrality(co_rt_graph, max_iter=1000)
     except nx.PowerIterationFailedConvergence:
         # Fall back to degree centrality if eigenvector fails
+        warnings.warn(
+            "cosine_eigenvector_ranker: eigenvector centrality did not "
+            "converge; falling back to DEGREE centrality. Scores for this "
+            "dataset are degree-based, not eigenvector-based.",
+            RuntimeWarning,
+            stacklevel=2,
+        )
         centrality = nx.degree_centrality(co_rt_graph)
 
     ranking = sorted(centrality.items(), key=lambda x: x[1], reverse=True)

@@ -17,66 +17,6 @@ from . import coordinated as coo
 from . import superspreaders as sup
 
 
-def extract_temporal_features(
-    reshare_data: pd.DataFrame,
-    time_col: str = "timestamp",
-    author_col: str = "author_id",
-    target_col: str = "target_author_id",
-) -> Dict[str, List[float]]:
-    """
-    Extract temporal activity features for each user.
-
-    Features include activity span and normalized frequency of resharing/being reshared.
-
-    Args:
-        reshare_data: DataFrame with reshare data
-        time_col: Column name for timestamp
-        author_col: Column name for resharer ID
-        target_col: Column name for original author ID
-
-    Returns:
-        Dictionary mapping user_id to list of temporal features
-    """
-    data = reshare_data.copy()
-
-    # Normalize timestamps to start at zero
-    if data[time_col].dtype == "object":
-        data[time_col] = pd.to_datetime(data[time_col])
-    data["time_delta"] = (data[time_col] - data[time_col].iloc[0]).dt.total_seconds()
-
-    user_features: Dict[str, List[float]] = {}
-
-    for row in data.itertuples(index=False):
-        timestamp = getattr(row, "time_delta")
-        resharer = getattr(row, author_col)
-        author = getattr(row, target_col)
-
-        # Initialize or update resharer features
-        # [first_seen, last_seen, reshare_count, received_reshare_count]
-        if resharer not in user_features:
-            user_features[resharer] = [timestamp, timestamp, 0, 0]
-        else:
-            user_features[resharer][1] = timestamp
-            user_features[resharer][2] += 1
-
-        # Initialize or update original author features
-        if author not in user_features:
-            user_features[author] = [timestamp, timestamp, 0, 0]
-        else:
-            user_features[author][1] = timestamp
-            user_features[author][3] += 1
-
-    # Normalize counts by active period
-    for user_id, features in user_features.items():
-        active_period = features[1] - features[0]
-        if active_period > 0:
-            features[2] = features[2] / active_period
-            features[3] = features[3] / active_period
-        user_features[user_id] = []  # Currently returning empty for compatibility
-
-    return user_features
-
-
 def extract_archetype_features(
     reshare_data: pd.DataFrame,
     credibility_threshold: float = 39.0,
@@ -86,7 +26,15 @@ def extract_archetype_features(
     Extract features from multiple ranking methods.
 
     Uses a selection of rankers as feature extractors to capture different
-    aspects of user behavior.
+    aspects of user behavior. These are the six features described in the
+    paper (code name -> paper name):
+
+    - repost_count            -> Repost Count
+    - early_reposter          -> Early Reposter Index (EaR-index)
+    - cosine_eigenvector      -> Coordination Centrality
+    - cosine_max              -> Coordination Edge Weight
+    - time_aware_influential  -> Time Aware Influence Score (TAI-score)
+    - tash_index              -> Time Aware Social H-index (TASH-index)
 
     Args:
         reshare_data: DataFrame with reshare data
@@ -126,7 +74,8 @@ def extract_all_features(
     """
     Extract all features for machine learning.
 
-    Combines archetype features (from ranking methods) with temporal features.
+    Currently this is exactly the six archetype features described in the
+    paper (see :func:`extract_archetype_features`).
 
     Args:
         reshare_data: DataFrame with reshare data
@@ -144,31 +93,7 @@ def extract_all_features(
         verbose=verbose,
     )
 
-    if verbose:
-        print("Extracting temporal features...")
-    temporal_features = extract_temporal_features(reshare_data)
-
-    if verbose:
-        print("Combining features...")
-
-    # Get all users present in any feature set
-    all_users = set(archetype_features.keys()) | set(temporal_features.keys())
-
-    user_features: Dict[str, List[float]] = {}
-
-    for user_id in all_users:
-        try:
-            features = []
-            if user_id in archetype_features:
-                features.extend(archetype_features[user_id])
-            if user_id in temporal_features:
-                features.extend(temporal_features[user_id])
-            if features:  # Only include if we have some features
-                user_features[user_id] = features
-        except KeyError:
-            continue
-
-    return sorted(user_features.items(), key=lambda x: x[0])
+    return sorted(archetype_features.items(), key=lambda x: x[0])
 
 
 def prepare_training_data(
