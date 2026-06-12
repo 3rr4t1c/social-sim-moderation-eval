@@ -216,6 +216,10 @@ __marimo__/
 # Legacy source archive (kept locally as reference, superseded by git history)
 legacy_src.zip
 
+# Simulator source, temporarily dropped here for cross-repo parity checks
+# (lives in its own repository)
+social_simulator_source/
+
 # Large input datasets (real + synthetic simulations) — too big for git.
 # Keep them locally; share via external storage if needed.
 static_evaluation/data/
