@@ -82,7 +82,6 @@ def build_parser() -> argparse.ArgumentParser:
                    help="Time bin width in days.")
     p.add_argument("--smooth-window", type=int,   default=7,    dest="smooth_window",
                    help="Rolling-mean window for time-series plot.")
-    p.add_argument("--confidence",    type=float, default=0.95)
     p.add_argument("--show",          action="store_true", default=False)
     return p
 
@@ -100,7 +99,7 @@ def main() -> None:
     print(f"Threshold     : {args.threshold} (0–1 scale)")
     print(f"Bin width     : {args.bin_width} day(s)")
     print(f"Smooth window : {args.smooth_window} bin(s)")
-    print(f"Confidence    : {args.confidence * 100:.0f}%")
+    print(f"Band          : median, 5th-95th percentile across runs")
 
     # Discover comparison folders
     comparison_dirs = (

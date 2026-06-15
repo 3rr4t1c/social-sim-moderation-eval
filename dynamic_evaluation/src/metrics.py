@@ -38,8 +38,7 @@ def compute_bins(
     ----------
     df:
         Normalised activities DataFrame as returned by
-        :func:`data_loader.load_synt_activities` or
-        :func:`data_loader.load_real_data`.
+        :func:`data_loader.load_synt_activities`.
         Must contain columns ``clock_time`` and ``quality`` (0–1 scale).
     bin_width:
         Width of each time bin in days (default: 1 day).

@@ -92,11 +92,13 @@ def _aggregate_runs(
 ) -> dict:
     """
     Aggregate bins from multiple runs into:
-      - timeseries (mean + CI)
-      - pre/post lq_fraction stats
-      - Cohen's d on raw quality (from the source DFs, not bins)
+      - timeseries: per-bin median + 5th/95th percentile band across runs
+        (inter-run dispersion, matching the static pipeline; NOT a CI of
+        the mean)
+      - pre/post lq_fraction stats (pooled per-bin)
+      - Cohen's d on pooled per-bin lq_fraction (pre vs post)
     """
-    ts = _agg_timeseries(bins_list, "lq_fraction", confidence=0.95)
+    ts = _agg_timeseries(bins_list, "lq_fraction")
 
     pre_lq_parts = []
     post_lq_parts = []
@@ -199,11 +201,11 @@ def plot_method_comparison(
         if ts.empty:
             continue
         t = ts["time_mid"].to_numpy()
-        mean = _smooth(ts["mean"].to_numpy(), smooth_window)
+        center = _smooth(ts["center"].to_numpy(), smooth_window)
         lo = _smooth(ts["lo"].to_numpy(), smooth_window)
         hi = _smooth(ts["hi"].to_numpy(), smooth_window)
 
-        ax.plot(t, mean, color=color, lw=_LW, ls=ls, zorder=3)
+        ax.plot(t, center, color=color, lw=_LW, ls=ls, zorder=3)
         ax.fill_between(t, lo, hi, color=color, alpha=_ALPHA_BAND, zorder=2)
         handles.append(Line2D([0], [0], color=color, lw=_LW, ls=ls,
                                label=label))
@@ -289,10 +291,10 @@ def plot_grid_comparison(
             if ts.empty:
                 continue
             t = ts["time_mid"].to_numpy()
-            mean = _smooth(ts["mean"].to_numpy(), smooth_window)
+            center = _smooth(ts["center"].to_numpy(), smooth_window)
             lo = _smooth(ts["lo"].to_numpy(), smooth_window)
             hi = _smooth(ts["hi"].to_numpy(), smooth_window)
-            ax.plot(t, mean, color=color, lw=_LW, ls=ls, zorder=3)
+            ax.plot(t, center, color=color, lw=_LW, ls=ls, zorder=3)
             ax.fill_between(t, lo, hi, color=color, alpha=_ALPHA_BAND, zorder=2)
 
         ax.axvline(t_mod, color="grey", ls=":", lw=1.0, zorder=1)
